@@ -1,0 +1,33 @@
+# Python environment
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Secrets and user data
+.env
+users.db
+
+# Temporary files
+temp_upload/
+*.tmp
+
+# Audio recordings (keep private)
+*.wav
+*.mp3
+*.m4a
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+Project/FluencyLens/temp_upload/
+Project/FluencyLens/venv/
+Project/FluencyLens/__pycache__/
+Project/FluencyLens/Clips/
+Project/FluencyLens/.env
+Project/FluencyLens/users.db
+
+Project/FluencyLens/temp_upload

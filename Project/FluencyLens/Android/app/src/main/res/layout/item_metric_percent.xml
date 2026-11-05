@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:background="#303431"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/percentValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="--%"
+        android:textColor="#B7F36B"
+        android:textSize="23sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Filler percentage"
+        android:textColor="#A6AAA6"
+        android:textSize="12sp"
+        android:layout_marginTop="5dp"/>
+
+</LinearLayout>

@@ -1,0 +1,16 @@
+### Voice Conversation Performance
+
+FluencyLens was tested across four voice conversation sessions.
+
+| Test | Response Latency |
+|---|---:|
+| 1 | 11.16 s |
+| 2 | 8.68 s |
+| 3 | 8.78 s |
+| 4 | 8.33 s |
+
+**Average response latency: 9.24 seconds**
+
+The latency was measured manually from pressing the Stop button to hearing the beginning of the AI-generated voice response.
+
+*Note: These are preliminary measurements from four manual tests, not a formal performance benchmark.*

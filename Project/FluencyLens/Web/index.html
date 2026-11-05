@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FluencyLens</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+
+
+
+<style>
+
+    :root {
+
+        --bg: #eef2f7;
+
+        --card: #ffffff;
+
+        --ink: #14213d;
+
+        --muted: #5d6b82;
+
+        --line: #dde4ee;
+
+        --accent: #2f5bff;
+
+        --good: #1f9d6b;
+
+        --warn: #d99a00;
+
+        --bad: #d64545;
+
+        --ring: var(--line);
+
+    }
+
+
+
+    * { box-sizing: border-box; }
+
+
+
+    body {
+
+        margin: 0;
+
+        min-height: 100vh;
+
+        font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+
+        background: var(--bg);
+
+        color: var(--ink);
+
+        display: flex;
+
+        justify-content: center;
+
+        padding: 32px 16px 48px;
+
+    }
+
+
+
+    .app { width: 100%; max-width: 560px; }
+
+
+
+    header { text-align: center; margin-bottom: 24px; }
+
+    h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em; }
+
+    header p { margin: 6px 0 0; color: var(--muted); }
+
+
+
+    .card {
+
+        background: var(--card);
+
+        border-radius: 20px;
+
+        padding: 24px;
+
+        box-shadow: 0 1px 2px rgba(20, 33, 61, .06), 0 12px 32px rgba(20, 33, 61, .06);
+
+        margin-bottom: 16px;
+
+    }
+
+
+
+    .question-text {
+
+        font-size: 20px;
+
+        font-weight: 600;
+
+        line-height: 1.4;
+
+        margin: 0 0 14px;
+
+        min-height: 56px;
+
+    }
+
+    .link-btn {
+
+        background: none;
+
+        border: 1px solid var(--line);
+
+        color: var(--ink);
+
+        padding: 8px 14px;
+
+        border-radius: 999px;
+
+        font: inherit;
+
+        font-size: 14px;
+
+        font-weight: 600;
+
+        cursor: pointer;
+
+    }
+
+    .link-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+    .link-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+
+
+    /* Recorder */
+
+    .recorder { text-align: center; }
+
+
+
+    .mic-wrap {
+
+        position: relative;
+
+        width: 120px;
+
+        height: 120px;
+
+        margin: 4px auto 16px;
+
+    }
+
+    .mic-pulse {
+
+        position: absolute;
+
+        inset: 0;
+
+        border-radius: 50%;
+
+        background: var(--bad);
+
+        opacity: 0;
+
+        transform: scale(1);
+
+        transition: transform .08s linear, opacity .08s linear;
+
+    }
+
+    .mic-core {
+
+        position: absolute;
+
+        inset: 18px;
+
+        border-radius: 50%;
+
+        background: var(--ink);
+
+        display: grid;
+
+        place-items: center;
+
+        font-size: 34px;
+
+        transition: *background* .2s;
+
+    }
+
+    .recording .mic-core { background: var(--bad); }
+
+
+
+    #timer {
+
+        font-variant-numeric: tabular-nums;
+
+        font-size: 28px;
+
+        font-weight: 800;
+
+        margin-bottom: 12px;
+
+    }
+
+
+
+    .buttons { display: flex; gap: 10px; justify-content: center; }
+
+    button.main {
+
+        padding: 14px 26px;
+
+        border: none;
+
+        border-radius: 12px;
+
+        font: inherit;
+
+        font-size: 16px;
+
+        font-weight: 600;
+
+        cursor: pointer;
+
+        transition: transform .1s, opacity .2s;
+
+    }
+
+    button.main:active:not(:disabled) { transform: scale(.97); }
+
+    button.main:disabled { opacity: .35; cursor: not-allowed; }
+
+    #recordBtn { background: var(--accent); color: #fff; }
+
+    #stopBtn { background: var(--ink); color: #fff; }
+
+
+
+    #status { margin: 16px 0 0; min-height: 22px; color: var(--muted); font-size: 15px; }
+
+    #status.error { color: var(--bad); font-weight: 600; }
+
+
+
+    button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+
+
+    /* Result */
+
+    .score-wrap {
+
+        position: relative;
+
+        width: 200px;
+
+        height: 200px;
+
+        margin: 0 auto 8px;
+
+    }
+
+    .score-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+    .track { fill: none; stroke: var(--line); stroke-width: 14; }
+
+    .bar {
+
+        fill: none;
+
+        stroke: var(--ring);
+
+        stroke-width: 14;
+
+        stroke-linecap: round;
+
+        stroke-dasharray: 534.1;
+
+        stroke-dashoffset: 534.1;
+
+        transition: stroke-dashoffset 1s cubic-bezier(.2, .8, .2, 1), stroke .3s;
+
+    }
+
+    #score {
+
+        position: absolute;
+
+        inset: 0;
+
+        display: grid;
+
+        place-items: center;
+
+        font-size: 64px;
+
+        font-weight: 800;
+
+        letter-spacing: -0.03em;
+
+    }
+
+    #label {
+
+        text-align: center;
+
+        margin: 0 0 20px;
+
+        font-size: 18px;
+
+        font-weight: 800;
+
+        letter-spacing: .04em;
+
+    }
+
+
+
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .stat {
+
+        background: var(--bg);
+
+        border-radius: 14px;
+
+        padding: 14px;
+
+    }
+
+    .stat b { display: block; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    .stat span.unit { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+    .stat .name { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+
+
+    .hint { margin-top: 14px; font-size: 14px; color: var(--muted); text-align: center; line-height: 1.5; }
+
+
+
+    @media (prefers-reduced-motion: reduce) {
+
+        * { transition: none !important; animation: none !important; }
+
+    }
+
+
+
+    [hidden] {
+
+        display: none !important;
+
+    }
+
+
+
+
+
+/* ===== FluencyLens Sidebar ===== */
+
+
+
+    .app-layout {
+
+        min-height: 100vh;
+
+        display: flex;
+
+        background: #171A19;
+
+    }
+
+
+
+    .sidebar {
+
+        width: 245px;
+
+        min-width: 245px;
+
+        height: 100vh;
+
+        position: sticky;
+
+        top: 0;
+
+        background: #252827;
+
+        border-right: 1px solid #383D39;
+
+        padding: 25px 16px;
+
+        box-sizing: border-box;
+
+        display: flex;
+
+        flex-direction: column;
+
+    }
+
+
+
+    .sidebar-brand h2 {
+
+        color: #B7F36B;
+
+        font-size: 21px;
+
+        letter-spacing: 2px;
+
+        margin-bottom: 5px;
+
+    }
+
+
+
+    .sidebar-brand h2 span {
+
+        color: #F5F1E8;
+
+    }
+
+
+
+    .sidebar-brand p {
+
+        color: #A6AAA6;
+
+        font-size: 12px;
+
+        margin-bottom: 35px;
+
+    }
+
+
+
+    .sidebar-nav {
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 9px;
+
+    }
+
+
+
+    .nav-item {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 13px;
+
+        padding: 13px;
+
+        border-radius: 10px;
+
+        color: #A6AAA6;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        transition: .2s;
+
+    }
+
+
+
+    .nav-item span {
+
+        width: 22px;
+
+        text-align: center;
+
+        font-size: 18px;
+
+    }
+
+
+
+    .nav-item:hover,
+
+    .nav-item.active {
+
+        background: #303431;
+
+        color: #B7F36B;
+
+    }
+
+
+
+    .sidebar-bottom {
+
+        margin-top: auto;
+
+    }
+
+
+
+    .logout-btn {
+
+        width: 100%;
+
+        background: #303431;
+
+        color: #F5F1E8;
+
+        text-align: left;
+
+    }
+
+
+
+    .app {
+
+        flex: 1;
+
+        min-width: 0;
+
+        width: auto;
+
+        margin: 0 auto;
+
+        padding: 20px;
+
+    }
+
+
+
+/* Mobile navigation */
+
+
+
+    @media (max-width: 700px) {
+
+        .app-layout {
+
+            flex-direction: column;
+
+        }
+
+
+
+        .sidebar {
+
+            width: 100%;
+
+            min-width: 0;
+
+            height: auto;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+            padding: 12px;
+
+        }
+
+
+
+        .sidebar-brand p,
+
+        .sidebar-bottom {
+
+            display: none;
+
+        }
+
+
+
+        .sidebar-brand h2 {
+
+            margin: 0 0 10px;
+
+            font-size: 17px;
+
+        }
+
+
+
+        .sidebar-nav {
+
+            flex-direction: row;
+
+            overflow-x: auto;
+
+            gap: 5px;
+
+        }
+
+
+
+        .nav-item {
+
+            flex-direction: column;
+
+            gap: 3px;
+
+            min-width: 65px;
+
+            padding: 8px 5px;
+
+            font-size: 10px;
+
+        }
+
+
+
+        .app {
+
+            padding: 12px;
+
+        }
+
+    }
+
+
+
+
+
+        html, body {
+
+        width: 100%;
+
+            min-height: 100%;
+
+            margin: 0;
+
+        }
+
+
+
+        .app-layout {
+
+        display: flex;
+
+            width: 100%;
+
+            min-height: 100vh;
+
+        }
+
+
+
+        .sidebar {
+
+            flex: 0 0 245px;
+
+            width: 245px;
+
+        }
+
+
+
+        main.app {
+
+            flex: 1 1 auto;
+
+            width: auto !important;
+
+            max-width: none !important;
+
+            min-width: 0;
+
+            margin: 0 !important;
+
+            padding: 30px 5%;
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        .app > header {
+
+            text-align: left;
+
+            margin-bottom: 28px;
+
+        }
+
+
+
+        .app > .card {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+        }
+
+
+
+        @media (min-width: 1000px) {
+
+            main.app {
+
+                padding: 35px 6%;
+
+            }
+
+        }
+
+
+
+
+
+/* ===== FLUENCYLENS DARK THEME ===== */
+
+
+
+    :root {
+
+        --bg: #171A19;
+
+        --surface: #252827;
+
+        --surface-2: #303431;
+
+        --lime: #B7F36B;
+
+        --white: #F5F1E8;
+
+        --muted: #A6AAA6;
+
+        --border: #383D39;
+
+    }
+
+
+
+    html, body {
+
+        background: var(--bg) !important;
+
+        color: var(--white) !important;
+
+        font-family: Arial, sans-serif;
+
+    }
+
+
+
+    .app-layout {
+
+        background: var(--bg) !important;
+
+    }
+
+
+
+    main.app {
+
+        background: var(--bg) !important;
+
+        color: var(--white) !important;
+
+        max-width: 1250px !important;
+
+        margin: 0 auto !important;
+
+        padding: 35px 45px !important;
+
+    }
+
+
+
+/* Header */
+
+    .app header h1 {
+
+        color: var(--lime) !important;
+
+        font-size: 32px;
+
+        letter-spacing: 2px;
+
+    }
+
+
+
+    .app header p {
+
+        color: var(--muted) !important;
+
+    }
+
+
+
+/* All cards */
+
+    .card {
+
+        background: var(--surface) !important;
+
+        color: var(--white) !important;
+
+        border: 1px solid var(--border) !important;
+
+        border-radius: 16px !important;
+
+        padding: 25px !important;
+
+        box-shadow: none !important;
+
+    }
+
+
+
+    .card h2,
+
+    .card h3,
+
+    .card p,
+
+    .question-text {
+
+        color: var(--white);
+
+    }
+
+
+
+    .hint,
+
+    #status {
+
+        color: var(--muted) !important;
+
+    }
+
+
+
+/* Inputs */
+
+    input,
+
+    textarea {
+
+        background: var(--surface-2) !important;
+
+        color: var(--white) !important;
+
+        border: 1px solid var(--border) !important;
+
+        border-radius: 9px !important;
+
+        padding: 12px !important;
+
+    }
+
+
+
+    input::placeholder {
+
+        color: var(--muted) !important;
+
+    }
+
+
+
+/* Buttons */
+
+    button {
+
+        border-radius: 10px !important;
+
+        cursor: pointer;
+
+        transition: .2s;
+
+    }
+
+
+
+    button.main {
+
+        background: var(--lime) !important;
+
+        color: var(--bg) !important;
+
+        border: none !important;
+
+        font-weight: bold;
+
+        padding: 12px 20px;
+
+    }
+
+
+
+    button.main:hover {
+
+        filter: brightness(1.08);
+
+    }
+
+
+
+    button:disabled {
+
+        opacity: .45;
+
+        cursor: not-allowed;
+
+    }
+
+
+
+    button.link-btn {
+
+        background: transparent !important;
+
+        color: var(--lime) !important;
+
+        border: 1px solid var(--border) !important;
+
+    }
+
+
+
+/* Recorder */
+
+    .recorder {
+
+        text-align: center;
+
+    }
+
+
+
+    .mic-core {
+
+        background: var(--surface-2) !important;
+
+        color: var(--lime);
+
+    }
+
+
+
+/* Conversation */
+
+    #chatHistory {
+
+        color: var(--white);
+
+        line-height: 1.8;
+
+    }
+
+
+
+/* Speech analysis */
+
+    .score-wrap {
+
+        color: var(--lime);
+
+    }
+
+
+
+    .stat {
+
+        background: var(--surface-2) !important;
+
+        color: var(--white) !important;
+
+        border-radius: 12px;
+
+        padding: 18px;
+
+    }
+
+
+
+    .stat b {
+
+        color: var(--lime) !important;
+
+    }
+
+
+
+    .stat .name,
+
+    .stat .unit {
+
+        color: var(--muted) !important;
+
+    }
+
+
+
+/* Feedback */
+
+    #feedbackCard {
+
+        background: var(--surface) !important;
+
+    }
+
+
+
+    #feedbackCard h2 {
+
+        color: var(--lime) !important;
+
+    }
+
+
+
+/* Mobile */
+
+    @media (max-width: 700px) {
+
+        main.app {
+
+            padding: 18px 12px !important;
+
+        }
+
+
+
+        .card {
+
+            padding: 18px !important;
+
+        }
+
+    }
+
+
+
+/* ===== LOGIN / REGISTER CARD ===== */
+
+
+
+    #authCard {
+
+        width: 100%;
+
+        max-width: 520px;
+
+        margin: 45px auto;
+
+        padding: 35px !important;
+
+        box-sizing: border-box;
+
+        border-radius: 18px !important;
+
+    }
+
+
+
+    #authCard h2 {
+
+        font-size: 26px;
+
+        margin-bottom: 10px;
+
+    }
+
+
+
+    #authCard > p {
+
+        color: var(--muted);
+
+        margin-bottom: 24px;
+
+    }
+
+
+
+    #authCard input {
+
+        display: block;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        margin: 12px 0;
+
+        min-height: 46px;
+
+    }
+
+
+
+    #registerNameField {
+
+        width: 100%;
+
+    }
+
+
+
+    #registerNameField[hidden] {
+
+        display: none !important;
+
+    }
+
+
+
+    #authCard button {
+
+        display: inline-block;
+
+        margin: 8px 8px 0 0;
+
+        min-height: 42px;
+
+    }
+
+
+
+    #authCard button.main {
+
+        min-width: 110px;
+
+    }
+
+
+
+    #authCard button.link-btn {
+
+        padding: 10px 16px;
+
+    }
+
+
+
+    #authStatus {
+
+        margin-top: 15px;
+
+        font-size: 14px;
+
+    }
+
+
+
+/* Keep the login card centered */
+
+    @media (min-width: 900px) {
+
+        #authCard {
+
+            margin-top: 65px;
+
+        }
+
+    }
+
+
+
+
+
+/* =================================
+
+   FLUENCYLENS AUTHENTICATION SCREEN
+
+\================================= */
+
+
+
+/* Hide sidebar and header while logged out */
+
+    .app-layout:has(#authCard:not([hidden])) .sidebar {
+
+        display: none !important;
+
+    }
+
+
+
+    .app-layout:has(#authCard:not([hidden])) main.app > header {
+
+        display: none !important;
+
+    }
+
+
+
+/* Full-screen login layout */
+
+    .app-layout:has(#authCard:not([hidden])) {
+
+        min-height: 100vh;
+
+         width: 100%;
+
+    }
+
+
+
+    .app-layout:has(#authCard:not([hidden])) main.app {
+
+        width: 100% !important;
+
+        min-height: 100vh;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        align-items: center;
+
+        padding: 30px 20px !important;
+
+    }
+
+
+
+/* Login card */
+
+    #authCard {
+
+        width: 100%;
+
+        max-width: 460px;
+
+        margin: 0 auto !important;
+
+        padding: 38px !important;
+
+        border: 1px solid #414740 !important;
+
+        border-radius: 22px !important;
+
+        background: rgba(37, 40, 39, 0.94) !important;
+
+        box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+
+        position: relative;
+
+        z-index: 2;
+
+    }
+
+
+
+    #authCard input {
+
+        display: block;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        margin: 14px 0;
+
+        min-height: 48px;
+
+    }
+
+
+
+    #authCard button {
+
+        margin-top: 12px;
+
+    }
+
+
+
+/* =================================
+
+   BUBBLE TEXTURE BACKGROUND
+
+\================================= */
+
+
+
+    body {
+
+        background-color: #171A19 !important;
+
+        position: relative;
+
+        isolation: isolate;
+
+    }
+
+
+
+    body::before {
+
+        content: "";
+
+        position: fixed;
+
+        inset: 0;
+
+        z-index: -1;
+
+        pointer-events: none;
+
+
+
+        background:
+
+            radial-gradient(circle at 12% 20%,
+
+                rgba(183,243,107,0.12) 0px,
+
+                rgba(183,243,107,0.04) 45px,
+
+                transparent 85px),
+
+
+
+            radial-gradient(circle at 85% 18%,
+
+                rgba(183,243,107,0.09) 0px,
+
+                transparent 100px),
+
+
+
+            radial-gradient(circle at 75% 78%,
+
+                rgba(183,243,107,0.08) 0px,
+
+                transparent 115px),
+
+
+
+            radial-gradient(circle at 18% 85%,
+
+                rgba(183,243,107,0.07) 0px,
+
+                transparent 90px),
+
+
+
+            radial-gradient(circle at 50% 48%,
+
+                rgba(255,255,255,0.035) 0px,
+
+                transparent 180px);
+
+    }
+
+
+
+/* Subtle decorative bubble circles */
+
+    body::after {
+
+        content: "";
+
+        position: fixed;
+
+        inset: 0;
+
+        z-index: -1;
+
+        pointer-events: none;
+
+
+
+        background-image:
+
+            radial-gradient(circle, transparent 18px,
+
+                rgba(183,243,107,0.12) 19px,
+
+                transparent 21px),
+
+            radial-gradient(circle, transparent 9px,
+
+                rgba(245,241,232,0.10) 10px,
+
+                transparent 12px),
+
+            radial-gradient(circle, transparent 27px,
+
+                rgba(183,243,107,0.08) 28px,
+
+                transparent 30px);
+
+
+
+        background-size: 260px 260px, 190px 190px, 360px 360px;
+
+        background-position: 20px 30px, 110px 90px, 180px 140px;
+
+    }
+
+
+
+/* Keep the login card readable on mobile */
+
+    @media (max-width: 600px) {
+
+        #authCard {
+
+            padding: 25px !important;
+
+        }
+
+    }
+
+
+
+
+
+
+/* ===== Editorial landing page inspired by the supplied reference ===== */
+html { scroll-behavior:smooth; }
+body { display:block !important; padding:0 !important; background:#b96f5c !important; color:#f5efdF !important; }
+.app-layout { display:block !important; min-height:100vh; background:#b96f5c !important; }
+.landing-page { display:block; width:100%; overflow:hidden; background:#b96f5c; color:#f5efdf; font-family:Georgia,"Times New Roman",serif; }
+.landing-nav { height:104px; padding:18px 4.5%; display:grid; grid-template-columns:1fr 180px 1fr; align-items:center; border-bottom:1px solid rgba(245,239,223,.45); font-family:Arial,sans-serif; letter-spacing:1.5px; font-size:11px; }
+.landing-links,.landing-actions { display:flex; align-items:center; gap:26px; }
+.landing-links a { color:#f5efdf; text-decoration:none; padding-bottom:7px; }
+.landing-links a.current { border-bottom:1px solid #f5efdf; }
+.landing-logo { justify-self:center; position:relative; color:#f5efdf; text-align:center; text-decoration:none; font-size:19px; line-height:.88; font-weight:900; letter-spacing:2px; border:1px solid rgba(245,239,223,.8); padding:10px 15px; }
+.landing-logo span { color:#b7f36b; }
+.landing-logo small { position:absolute; right:-22px; top:12px; font-size:12px; }
+.landing-actions { justify-content:flex-end; gap:20px; }
+.landing-actions>span:first-child { line-height:1.35; }
+.landing-cta,.landing-footer button { border:0; background:#e7a2a0; color:#22251f; border-radius:30px; padding:13px 20px; font:700 10px Arial,sans-serif; letter-spacing:1px; cursor:pointer; }
+.user-mark,.menu-mark { font-size:20px; }
+.hero { min-height:690px; height:min(78vw,790px); position:relative; display:flex; justify-content:center; align-items:center; isolation:isolate; overflow:hidden; background:#b96f5c; }
+.hero-orbit { position:absolute; z-index:-1; border-radius:50%; }
+.orbit-one { width:min(67vw,800px); aspect-ratio:1; background:#344a38; left:50%; top:49%; transform:translate(-50%,-50%); }
+.orbit-two { width:220px; height:220px; background:#e7a2a0; right:-65px; top:18%; opacity:.95; }
+.hero-copy { position:relative; z-index:3; text-align:center; margin-top:-15px; }
+.eyebrow { font:700 10px Arial,sans-serif; letter-spacing:3px; margin-bottom:22px; color:#d8d1bb; }
+.hero h1 { margin:0; color:#f5efdf; font-size:clamp(54px,8.5vw,124px); line-height:.83; letter-spacing:-.075em; font-weight:900; }
+.hero h1 span { color:#b7f36b; }
+.hero-description { margin:28px 0 22px; font:600 11px/1.7 Arial,sans-serif; letter-spacing:1.5px; }
+.hero-button { background:#f5efdf; border:0; color:#28352b; padding:16px 24px; border-radius:40px; font:800 11px Arial,sans-serif; letter-spacing:1.4px; cursor:pointer; }
+.hero-button span { margin-left:22px; font-size:17px; }
+.hero-stamp { position:absolute; left:5%; top:18%; width:112px; height:112px; border:1px solid rgba(245,239,223,.7); border-radius:50%; display:grid; place-items:center; text-align:center; padding:20px; font:700 9px/1.6 Arial,sans-serif; letter-spacing:1px; transform:rotate(-15deg); }
+.hero-left-note,.hero-right-note { position:absolute; z-index:4; bottom:17%; font:700 11px/1.5 Arial,sans-serif; letter-spacing:1px; }
+.hero-left-note { left:6%; }.hero-right-note { right:7%; text-align:right; }
+.hero-left-note:first-line,.hero-right-note:first-line { font-size:34px; color:#b7f36b; }
+.hero-mic { position:absolute; z-index:2; left:50%; top:52%; width:155px; height:340px; transform:translate(-50%,-45%) rotate(8deg); filter:drop-shadow(18px 24px 14px rgba(0,0,0,.28)); pointer-events:none; }
+.mic-glow { position:absolute; width:190px; height:190px; border-radius:50%; background:rgba(245,239,223,.12); left:-18px; top:8px; filter:blur(10px); }
+.mic-head { position:absolute; left:34px; top:0; width:88px; height:125px; border-radius:48% 48% 30% 30%; background:repeating-linear-gradient(90deg,#aeb4a8 0 2px,#50594f 3px 5px); border:5px solid #c7c8b9; box-shadow:inset 0 0 18px #242b27; }
+.mic-head:before { content:""; position:absolute; inset:8px 9px; border-radius:50%; background:repeating-linear-gradient(0deg,transparent 0 4px,rgba(15,20,17,.55) 5px 6px); }
+.mic-head i { position:absolute; left:0; right:0; bottom:12px; height:8px; background:#b7f36b; opacity:.7; }
+.mic-neck { position:absolute; top:117px; left:62px; width:32px; height:28px; background:#777e70; }
+.mic-body { position:absolute; top:140px; left:54px; width:48px; height:108px; border-radius:10px; background:linear-gradient(90deg,#434d43,#aeb3a2 45%,#424b41); border:2px solid #d0cbbb; }
+.mic-body span { position:absolute; top:42px; left:-16px; width:78px; text-align:center; color:#28352b; font:700 5px Arial,sans-serif; letter-spacing:1px; }
+.mic-stand { position:absolute; top:245px; left:72px; height:67px; width:10px; background:#747c70; }
+.mic-base { position:absolute; bottom:0; left:38px; width:78px; height:12px; border-radius:50%; background:#515b50; }
+.hero-bottom { position:absolute; bottom:24px; left:0; right:0; text-align:center; font:700 9px Arial,sans-serif; letter-spacing:3px; color:#e8d7c8; }
+.how-section { background:#f1ead9; color:#29352b; padding:55px 5% 24px; }
+.how-heading { display:flex; justify-content:space-between; border-bottom:1px solid #a9a493; padding-bottom:18px; font:700 10px Arial,sans-serif; letter-spacing:2px; }
+.how-heading b { font-weight:700; }
+.how-grid { display:grid; grid-template-columns:repeat(4,1fr); }
+.how-grid article { padding:28px 22px 38px; border-right:1px solid #c6c0af; }
+.how-grid article:first-child { padding-left:0; }.how-grid article:last-child { border:0; }
+.how-grid small { display:inline-grid; place-items:center; width:28px; height:28px; border:1px solid #8d967d; border-radius:50%; font:700 9px Arial,sans-serif; }
+.how-grid h2 { font-size:clamp(30px,4vw,54px); letter-spacing:-2px; margin:20px 0 10px; }
+.how-grid p { font:13px/1.6 Arial,sans-serif; color:#687064; }
+.landing-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #c6c0af; padding-top:20px; font:700 9px Arial,sans-serif; letter-spacing:1.4px; }
+.landing-footer button { background:#344a38; color:#f5efdf; }
+.app-layout:not(.authenticated) > .sidebar { display:none !important; }
+.app-layout:not(.authenticated) > main.app { display:none !important; }
+.app-layout.auth-screen > main.app { display:flex !important; min-height:100vh; width:100%; justify-content:center; align-items:center; }
+.app-layout.auth-screen .landing-page { display:none !important; }
+.app-layout.auth-screen main.app > header { display:none !important; }
+.app-layout.authenticated { display:flex !important; background:#171A19 !important; }
+.app-layout.authenticated > .sidebar { display:flex !important; }
+.app-layout.authenticated > main.app { display:block !important; }
+.app-layout.authenticated .landing-page { display:none !important; }
+.app-layout.authenticated main.app { max-width:none !important; }
+@media(max-width:760px) {
+ .landing-nav { height:auto; min-height:78px; grid-template-columns:1fr auto; padding:14px 5%; }
+ .landing-links { gap:12px; font-size:9px; grid-column:1/-1; grid-row:2; justify-content:center; padding-top:12px; }
+ .landing-logo { grid-column:1; grid-row:1; justify-self:start; font-size:16px; }
+ .landing-actions { grid-column:2; grid-row:1; gap:10px; }.landing-actions>span:first-child,.user-mark { display:none; }
+ .landing-cta { padding:11px 13px; font-size:9px; }
+ .hero { min-height:650px; height:82vh; max-height:760px; }
+ .orbit-one { width:105vw; }.hero h1 { font-size:clamp(48px,12vw,82px); }
+ .hero-mic { transform:translate(-50%,-35%) scale(.78) rotate(8deg); top:54%; }
+ .hero-description { font-size:9px; }.hero-stamp { width:82px;height:82px;left:3%;top:10%;font-size:7px;padding:12px; }
+ .hero-left-note { left:5%;bottom:10%;font-size:9px; }.hero-right-note { right:5%;bottom:10%;font-size:9px; }
+ .how-section { padding:36px 6% 20px; }.how-heading { gap:20px;font-size:9px; }
+ .how-grid { grid-template-columns:1fr 1fr; }.how-grid article { padding:22px 12px 24px;border-bottom:1px solid #c6c0af; }
+ .how-grid article:nth-child(2) { border-right:0; }.how-grid article:first-child { padding-left:12px; }
+ .how-grid h2 { font-size:34px; }.how-grid p { font-size:11px; }
+ .landing-footer { flex-wrap:wrap; gap:14px; font-size:8px; }
+}
+
+
+/* ===== FINAL REFERENCE MATCH: LIME / FOREST / IVORY ===== */
+:root { --fl-lime:#78b900; --fl-green:#092f1d; --fl-ivory:#fff2d9; --fl-ink:#101710; }
+body { margin:0 !important; padding:0 !important; background:var(--fl-lime) !important; color:var(--fl-ivory) !important; }
+.app-layout { width:100%; min-height:100vh; display:block !important; background:var(--fl-lime) !important; }
+.landing-page { background:#79b900 !important; color:var(--fl-ivory) !important; font-family:Arial, sans-serif !important; }
+.landing-nav { height:72px !important; box-sizing:border-box; padding:10px 3% !important; grid-template-columns:1fr 150px 1fr !important; border-bottom:1px solid rgba(255,242,217,.85) !important; font-size:14px !important; letter-spacing:.3px !important; position:relative; z-index:10; }
+.landing-links,.landing-actions { gap:34px !important; }
+.landing-links a { color:var(--fl-ivory) !important; font-weight:700; font-size:14px !important; }
+.landing-logo { border:2px solid var(--fl-ivory) !important; padding:8px 10px !important; font-family:Impact, 'Arial Narrow', sans-serif !important; font-size:25px !important; line-height:.82 !important; letter-spacing:-.5px !important; color:var(--fl-ivory) !important; }
+.landing-logo span { color:var(--fl-ivory) !important; }
+.landing-logo small { display:none; }
+.landing-actions { gap:22px !important; }
+.landing-actions>span:first-child { color:var(--fl-ivory); font-weight:700; font-size:13px; }
+.landing-cta,.landing-footer button { background:var(--fl-ivory) !important; color:#101710 !important; border-radius:28px !important; padding:13px 24px !important; font-size:13px !important; letter-spacing:0 !important; }
+.user-mark { border:1.5px solid var(--fl-ivory); border-radius:50%; width:34px; height:34px; display:grid; place-items:center; font-size:22px !important; }
+.menu-mark { font-size:29px !important; font-weight:300; }
+.hero { height: min(72vw, 555px) !important; min-height:500px !important; max-height:620px; background-color:#79b900 !important;
+ background-image:radial-gradient(ellipse at 18% 15%,rgba(190,255,0,.35),transparent 38%),radial-gradient(ellipse at 82% 70%,rgba(40,100,0,.20),transparent 42%),repeating-linear-gradient(112deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px) !important; }
+.hero:after { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.16; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E"); }
+.orbit-one { width:min(55vw,790px) !important; background:#07351f !important; left:50% !important; top:48% !important; }
+.orbit-two { width:210px !important; height:210px !important; background:var(--fl-ivory) !important; right:-80px !important; top:32% !important; opacity:1 !important; }
+.hero-copy { z-index:4 !important; margin-top:0 !important; width:100%; }
+.eyebrow { display:none !important; }
+.hero h1 { font-family:Georgia, 'Times New Roman', serif !important; color:var(--fl-ivory) !important; font-size:clamp(58px,8.1vw,122px) !important; font-weight:900 !important; line-height:.83 !important; letter-spacing:-.065em !important; text-shadow:0 1px 0 rgba(0,0,0,.08); }
+.hero h1 span { color:var(--fl-ivory) !important; }
+.hero-description { color:var(--fl-ivory) !important; font-size:clamp(12px,1.45vw,19px) !important; line-height:1.35 !important; letter-spacing:.6px !important; font-weight:700 !important; margin:24px 0 18px !important; }
+.hero-button { background:var(--fl-ivory) !important; color:#101710 !important; border-radius:40px !important; padding:15px 38px !important; font-size:17px !important; letter-spacing:0 !important; font-weight:800 !important; }
+.hero-button span { margin-left:18px !important; }
+.hero-stamp { color:var(--fl-ivory); }
+.hero-left-note,.hero-right-note { bottom:7% !important; color:var(--fl-ivory) !important; font-size:13px !important; }
+.hero-left-note:first-line,.hero-right-note:first-line { color:var(--fl-ivory) !important; }
+.hero-bottom { display:none !important; }
+/* More dimensional CSS microphone, positioned over the headline as in the reference. */
+.hero-mic { z-index:5 !important; width:145px !important; height:310px !important; top:48% !important; left:50% !important; transform:translate(-50%,-25%) rotate(-13deg) !important; filter:drop-shadow(15px 22px 12px rgba(0,0,0,.4)) !important; }
+.mic-glow { display:none !important; }
+.mic-head { left:27px !important; width:91px !important; height:116px !important; border:5px solid #c9c9bd !important; border-radius:50% 50% 35% 35% !important; background:repeating-linear-gradient(90deg,#d8d9d1 0 1px,#515b56 2px 3px),linear-gradient(#d8d9d1,#737c75) !important; box-shadow:inset 0 0 13px #151c19,0 2px 5px #151c19 !important; }
+.mic-head:before { inset:6px 7px !important; background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(8,16,12,.8) 4px 5px) !important; }
+.mic-head i { height:8px !important; bottom:9px !important; background:#272c29 !important; opacity:1 !important; }
+.mic-neck { top:110px !important; left:54px !important; width:39px !important; height:34px !important; background:linear-gradient(90deg,#363b38,#aeb2aa,#313633) !important; }
+.mic-body { top:137px !important; left:47px !important; width:56px !important; height:111px !important; border-radius:8px 8px 15px 15px !important; background:linear-gradient(90deg,#171c1a,#aeb3ab 35%,#414743 72%,#111613) !important; border:2px solid #c9c9bd !important; }
+.mic-body span { top:35px !important; left:-10px !important; width:72px !important; color:#f4f0e4 !important; font-size:6px !important; }
+.mic-stand { top:245px !important; left:71px !important; height:58px !important; width:9px !important; background:linear-gradient(90deg,#303632,#c1c4b8,#3b423d) !important; }
+.mic-base { bottom:0 !important; left:42px !important; width:68px !important; height:10px !important; background:#313934 !important; }
+.how-section { background:#fff0d8 !important; color:#111 !important; padding:22px 4% 18px !important; }
+.how-heading { border-bottom:1px solid #25251f !important; padding-bottom:9px !important; color:#111 !important; font-size:15px !important; letter-spacing:0 !important; }
+.how-grid article { padding:27px 34px 16px !important; border-right:1px solid #38382f !important; }
+.how-grid article:first-child { padding-left:34px !important; }
+.how-grid article:last-child { border:0 !important; }
+.how-grid small { border:1.5px solid #111 !important; color:#111 !important; width:34px !important; height:34px !important; font-size:12px !important; }
+.how-grid h2 { color:#050505 !important; font-family:Georgia,'Times New Roman',serif !important; font-size:clamp(34px,4vw,52px) !important; letter-spacing:-1.5px !important; margin:4px 0 3px !important; }
+.how-grid p { color:#111 !important; font-size:16px !important; font-weight:600 !important; line-height:1.25 !important; margin-top:4px !important; }
+.landing-footer { color:#111 !important; }
+
+/* Login/register uses the same visual language instead of the legacy charcoal card. */
+.app-layout.auth-screen { min-height:100vh !important; background:#79b900 !important; background-image:radial-gradient(ellipse at 18% 15%,rgba(190,255,0,.35),transparent 38%),repeating-linear-gradient(112deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px) !important; }
+.app-layout.auth-screen main.app { min-height:100vh !important; width:100% !important; padding:42px 20px !important; justify-content:center !important; align-items:center !important; background:transparent !important; }
+.app-layout.auth-screen #authCard { max-width:480px !important; margin:0 auto !important; padding:42px !important; border:1px solid rgba(255,242,217,.65) !important; border-radius:4px !important; background:#07351f !important; color:#fff2d9 !important; box-shadow:14px 16px 0 rgba(5,43,24,.22) !important; }
+.app-layout.auth-screen #authCard h2 { color:#fff2d9 !important; font-family:Georgia,'Times New Roman',serif !important; font-size:36px !important; line-height:1.05 !important; margin:0 0 12px !important; }
+.app-layout.auth-screen #authCard > p { color:#e4e8d8 !important; font-size:14px !important; line-height:1.55 !important; }
+.app-layout.auth-screen #authCard label { color:#fff2d9 !important; }
+.app-layout.auth-screen #authCard input { background:#fdf1d9 !important; color:#152018 !important; border:1px solid #d9d0b9 !important; border-radius:2px !important; min-height:50px !important; padding:0 15px !important; font-size:15px !important; }
+.app-layout.auth-screen #authCard input::placeholder { color:#667064 !important; }
+.app-layout.auth-screen #authCard button.main { background:#fff2d9 !important; color:#101710 !important; border:0 !important; border-radius:30px !important; padding:13px 26px !important; min-height:48px !important; font-weight:800 !important; }
+.app-layout.auth-screen #authCard button.link-btn { color:#fff2d9 !important; background:transparent !important; border:1px solid rgba(255,242,217,.55) !important; border-radius:30px !important; }
+.app-layout.auth-screen #authStatus { color:#fff2d9 !important; }
+.app-layout.auth-screen #authCard:before { content:"FLUENCY LENS"; display:block; width:max-content; border:1px solid #fff2d9; color:#fff2d9; padding:8px 11px; margin:0 0 28px; font-weight:900; letter-spacing:1px; font-size:14px; }
+
+@media(max-width:760px) {
+ .landing-nav { grid-template-columns:1fr auto !important; min-height:82px !important; height:auto !important; padding:10px 4% !important; }
+ .landing-links { gap:13px !important; }
+ .landing-links a { font-size:10px !important; }
+ .landing-logo { font-size:19px !important; }
+ .landing-actions { gap:9px !important; }
+ .landing-actions>span:first-child,.user-mark { display:none !important; }
+ .landing-cta { padding:10px 13px !important; font-size:10px !important; }
+ .hero { min-height:610px !important; height:78vh !important; }
+ .orbit-one { width:115vw !important; }
+ .hero h1 { font-size:clamp(47px,11vw,78px) !important; }
+ .hero-mic { transform:translate(-50%,-5%) scale(.72) rotate(-13deg) !important; top:47% !important; }
+ .hero-description { font-size:10px !important; margin-top:18px !important; }
+ .hero-button { font-size:13px !important; padding:13px 25px !important; }
+ .hero-stamp { display:none !important; }
+ .hero-left-note,.hero-right-note { bottom:4% !important; font-size:9px !important; }
+ .how-section { padding:24px 5% !important; }
+ .how-grid article { padding:18px 10px !important; }
+ .how-grid article:first-child { padding-left:10px !important; }
+ .how-grid h2 { font-size:30px !important; }
+ .how-grid p { font-size:11px !important; }
+ .app-layout.auth-screen #authCard { padding:28px 23px !important; }
+ .app-layout.auth-screen #authCard h2 { font-size:30px !important; }
+}
+
+/* ===== AUTHENTICATED PRACTICE EXPERIENCE — SAME BRAND SYSTEM ===== */
+.app-layout.authenticated {
+  display:flex !important; min-height:100vh !important; width:100% !important;
+  background:#79b900 !important;
+  background-image:radial-gradient(ellipse at 18% 12%,rgba(190,255,0,.25),transparent 36%),repeating-linear-gradient(112deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px) !important;
+  color:#102417 !important;
+}
+.app-layout.authenticated > .sidebar {
+  width:248px !important; min-width:248px !important; height:100vh !important;
+  position:sticky !important; top:0 !important; align-self:flex-start !important;
+  padding:30px 18px !important; background:#07351f !important;
+  border:0 !important; border-right:1px solid rgba(255,242,217,.25) !important;
+  color:#fff2d9 !important;
+}
+.authenticated .sidebar-brand h2 { color:#fff2d9 !important; font-family:Georgia,serif !important; letter-spacing:-.5px !important; font-size:25px !important; }
+.authenticated .sidebar-brand h2 span { color:#b8e36a !important; }
+.authenticated .sidebar-brand p { color:#d7dfca !important; }
+.authenticated .sidebar-nav { gap:9px !important; margin-top:42px !important; }
+.authenticated .nav-item { color:#e9eadc !important; border-radius:4px !important; padding:14px 13px !important; font-weight:700 !important; }
+.authenticated .nav-item.active,.authenticated .nav-item:hover { background:#fff2d9 !important; color:#07351f !important; }
+.authenticated .logout-btn { color:#fff2d9 !important; border:1px solid rgba(255,242,217,.45) !important; border-radius:30px !important; }
+.app-layout.authenticated > main.app {
+  display:block !important; flex:1 1 auto !important; width:calc(100% - 248px) !important;
+  max-width:none !important; min-width:0 !important; margin:0 !important;
+  padding:34px clamp(22px,4vw,64px) 56px !important; background:transparent !important;
+}
+.app-layout.authenticated main.app > header {
+  text-align:left !important; margin:0 0 28px !important; padding:0 0 20px !important;
+  border-bottom:1px solid rgba(7,53,31,.5) !important;
+}
+.app-layout.authenticated main.app > header h1 {
+  color:#07351f !important; font-family:Georgia,'Times New Roman',serif !important;
+  font-size:clamp(34px,4vw,48px) !important; line-height:1 !important; letter-spacing:-1.5px !important;
+}
+.app-layout.authenticated main.app > header p { color:#173a24 !important; font-weight:700 !important; margin-top:8px !important; }
+#practiceApp[hidden] { display:none !important; }
+#practiceApp:not([hidden]) {
+  display:grid !important; grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);
+  grid-template-areas:"question analysis" "recorder analysis" "conversation feedback";
+  align-items:start; gap:18px; max-width:1440px; margin:0 auto;
+}
+#practiceApp > section:nth-child(1) { grid-area:question; }
+#practiceApp > #recorderCard { grid-area:recorder; }
+#practiceApp > section:nth-child(3) { grid-area:conversation; }
+#practiceApp > section:nth-child(4) { grid-area:analysis; }
+#practiceApp > #feedbackCard { grid-area:feedback; }
+.app-layout.authenticated .card {
+  background:#fff2d9 !important; color:#102417 !important;
+  border:1px solid rgba(7,53,31,.28) !important; border-radius:5px !important;
+  padding:25px !important; box-shadow:7px 8px 0 rgba(7,53,31,.13) !important;
+  margin:0 !important;
+}
+.app-layout.authenticated .card h2,.app-layout.authenticated .card h3,
+.app-layout.authenticated .card p,.app-layout.authenticated .question-text { color:#102417 !important; }
+#practiceApp > section:first-child { position:relative; overflow:hidden; }
+#practiceApp > section:first-child:before {
+  content:'TODAY’S SPEAKING PROMPT'; display:block; color:#49613d; font-size:11px;
+  font-weight:900; letter-spacing:1.5px; margin-bottom:15px;
+}
+#practiceApp .question-text { font-family:Georgia,'Times New Roman',serif !important; font-size:clamp(25px,3vw,38px) !important; line-height:1.12 !important; font-weight:800 !important; min-height:0 !important; margin:0 0 20px !important; }
+#practiceApp .link-btn { color:#07351f !important; border:1px solid #456344 !important; border-radius:30px !important; padding:10px 17px !important; font-weight:800 !important; }
+#practiceApp #recorderCard {
+  background:#07351f !important; color:#fff2d9 !important; text-align:center !important;
+  padding:32px 24px !important; min-height:320px; position:relative; overflow:hidden;
+}
+#practiceApp #recorderCard:before { content:'YOUR VOICE STUDIO'; display:block; color:#d5e3c4; font-size:11px; letter-spacing:2px; font-weight:900; margin-bottom:23px; }
+#practiceApp #recorderCard .mic-wrap { width:132px !important; height:132px !important; margin:0 auto 17px !important; }
+#practiceApp #recorderCard .mic-pulse { background:#b7e36b !important; }
+#practiceApp #recorderCard .mic-core { inset:13px !important; background:#fff2d9 !important; color:#07351f !important; font-size:43px !important; box-shadow:0 0 0 9px rgba(255,242,217,.13) !important; }
+#practiceApp #recorderCard.recording .mic-core { background:#b7e36b !important; }
+#practiceApp #timer { color:#fff2d9 !important; font-family:Georgia,serif !important; font-size:36px !important; margin:4px 0 18px !important; }
+#practiceApp .buttons { flex-wrap:wrap; gap:10px !important; }
+#practiceApp .buttons button.main { border-radius:30px !important; padding:13px 20px !important; font-weight:900 !important; font-size:14px !important; }
+#practiceApp #recordBtn { background:#fff2d9 !important; color:#07351f !important; }
+#practiceApp #stopBtn { background:#b7e36b !important; color:#102417 !important; }
+#practiceApp #endBtn { background:transparent !important; color:#fff2d9 !important; border:1px solid rgba(255,242,217,.65) !important; }
+#practiceApp #status { color:#e6edda !important; font-size:13px !important; }
+#practiceApp > section:nth-child(3) h2,
+#practiceApp #feedbackCard h2 { font-family:Georgia,serif !important; font-size:27px !important; margin:0 0 17px !important; }
+#practiceApp #chatHistory { color:#102417 !important; line-height:1.65 !important; }
+#practiceApp #chatHistory .hint { color:#59694f !important; }
+#practiceApp .score-wrap { width:190px !important; height:190px !important; margin:4px auto 10px !important; color:#07351f !important; }
+#practiceApp .track { stroke:#ded7c2 !important; }
+#practiceApp .bar { stroke:#6d9e24 !important; }
+#practiceApp #score { color:#07351f !important; font-family:Georgia,serif !important; }
+#practiceApp #label { color:#34512a !important; font-size:15px !important; letter-spacing:1px !important; }
+#practiceApp .stats { gap:11px !important; }
+#practiceApp .stat { background:#e9e2cc !important; border:1px solid #d4cbb0 !important; border-radius:4px !important; padding:17px !important; }
+#practiceApp .stat b { color:#07351f !important; font-family:Georgia,serif !important; font-size:25px !important; }
+#practiceApp .stat .name,#practiceApp .stat .unit { color:#536148 !important; font-size:12px !important; }
+#practiceApp #hint { color:#59694f !important; font-size:12px !important; line-height:1.5 !important; }
+#practiceApp #feedbackCard { background:#e5edcf !important; }
+#practiceApp #feedbackCard h2 { color:#07351f !important; }
+#practiceApp #feedbackCard h3 { color:#36532b !important; font-size:13px !important; text-transform:uppercase; letter-spacing:1px; margin:18px 0 6px !important; }
+#practiceApp #feedbackCard p,#practiceApp #feedbackCard div { line-height:1.6 !important; }
+.app-layout.authenticated input,.app-layout.authenticated textarea { background:#fff8e9 !important; color:#102417 !important; border:1px solid #c8c0a8 !important; }
+@media(max-width:1000px) {
+ .app-layout.authenticated > .sidebar { width:205px !important; min-width:205px !important; }
+ .app-layout.authenticated > main.app { width:calc(100% - 205px) !important; padding:25px 20px 40px !important; }
+ #practiceApp:not([hidden]) { grid-template-columns:1fr; grid-template-areas:"question" "recorder" "analysis" "conversation" "feedback"; }
+}
+@media(max-width:650px) {
+ .app-layout.authenticated { display:block !important; }
+ .app-layout.authenticated > .sidebar { position:relative !important; width:100% !important; min-width:0 !important; height:auto !important; padding:14px !important; }
+ .authenticated .sidebar-brand { text-align:center; }
+ .authenticated .sidebar-nav { flex-direction:row !important; flex-wrap:wrap; justify-content:center; margin-top:12px !important; }
+ .authenticated .nav-item { padding:9px 11px !important; font-size:12px !important; }
+ .authenticated .sidebar-bottom { display:none !important; }
+ .app-layout.authenticated > main.app { width:100% !important; padding:22px 14px 36px !important; }
+ .app-layout.authenticated main.app > header { margin-bottom:18px !important; }
+ .app-layout.authenticated .card { padding:19px !important; }
+ #practiceApp .buttons button.main { flex:1 1 auto; }
+}
+
+
+/* ===== Correct entry flow: sign in -> landing page -> speaking practice ===== */
+.app-layout.logged-in-landing {
+  display:block !important;
+  min-height:100vh !important;
+  background:#79b900 !important;
+}
+.app-layout.logged-in-landing > .sidebar,
+.app-layout.logged-in-landing > main.app { display:none !important; }
+.app-layout.logged-in-landing > .landing-page { display:block !important; }
+.app-layout.auth-screen {
+  min-height:100vh !important;
+  position:relative !important;
+  overflow:hidden !important;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,242,217,.18) 0 2px, transparent 3px),
+    radial-gradient(circle at 85% 22%, rgba(255,242,217,.14) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 50% 110%, rgba(4,53,31,.9) 0 27%, transparent 27.5%),
+    radial-gradient(ellipse at 8% 12%, rgba(193,255,69,.42), transparent 34%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 1px, transparent 1px 5px),
+    #79b900 !important;
+}
+.app-layout.auth-screen:before {
+  content:"";
+  position:fixed;
+  width:min(72vw,760px); height:min(72vw,760px);
+  border-radius:50%;
+  background:#07351f;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  opacity:.96;
+  pointer-events:none;
+}
+.app-layout.auth-screen:after {
+  content:"FLUENCY LENS  ·  SPEAK CLEARLY  ·  BUILD CONFIDENCE";
+  position:fixed;
+  left:50%; bottom:26px;
+  transform:translateX(-50%);
+  color:#fff2d9;
+  font:800 11px Arial,sans-serif;
+  letter-spacing:3px;
+  white-space:nowrap;
+  opacity:.85;
+  pointer-events:none;
+}
+.app-layout.auth-screen main.app {
+  position:relative !important;
+  z-index:2 !important;
+}
+.app-layout.auth-screen #authCard {
+  width:min(440px, calc(100vw - 36px)) !important;
+  box-sizing:border-box !important;
+  background:rgba(255,242,217,.96) !important;
+  color:#07351f !important;
+  border:2px solid #07351f !important;
+  border-radius:4px !important;
+  box-shadow:12px 12px 0 rgba(7,53,31,.3) !important;
+  padding:38px !important;
+}
+.app-layout.auth-screen #authCard h2 { color:#07351f !important; }
+.app-layout.auth-screen #authCard > p,
+.app-layout.auth-screen #authCard label { color:#36512f !important; }
+.app-layout.auth-screen #authCard input {
+  background:#fffaf0 !important;
+  border:1px solid #8b9c72 !important;
+  color:#102417 !important;
+  border-radius:2px !important;
+}
+.app-layout.auth-screen #authCard button.main {
+  background:#07351f !important;
+  color:#fff2d9 !important;
+  border-radius:30px !important;
+}
+.app-layout.auth-screen #authCard button.link-btn {
+  color:#07351f !important;
+  border:1px solid #07351f !important;
+}
+.app-layout.auth-screen #authStatus { color:#07351f !important; }
+@media(max-width:650px) {
+  .app-layout.auth-screen:before { width:115vw; height:115vw; }
+  .app-layout.auth-screen #authCard { padding:27px 22px !important; }
+  .app-layout.auth-screen:after { font-size:8px; letter-spacing:1.5px; }
+}
+
+
+/* Fluid transition into speaking practice */
+html { scroll-behavior: smooth; }
+.app-layout.practice-transitioning { overflow-x: clip; }
+.app-layout.practice-transitioning main.app { will-change: opacity, transform; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .app-layout.practice-transitioning main.app { animation:none !important; }
+}
+
+
+/* ===== Scroll-driven editorial motion (natural scrolling stays enabled) ===== */
+html { scroll-behavior:smooth; }
+body { overflow-x:hidden; }
+.landing-page { overflow:clip; }
+.landing-nav { transition:background .35s ease, backdrop-filter .35s ease; }
+.landing-page.is-scrolling .landing-nav {
+  background:rgba(7,47,29,.18);
+  backdrop-filter:blur(8px);
+}
+.hero-orbit { will-change:transform; }
+.hero-copy, .hero-stamp, .hero-left-note, .hero-right-note, .hero-mic, .hero-bottom,
+.how-heading, .how-grid article, .landing-footer {
+  opacity:0;
+  transform:translate3d(0,34px,0);
+  transition:
+    opacity .85s cubic-bezier(.2,.75,.25,1),
+    transform .95s cubic-bezier(.2,.75,.25,1);
+}
+.hero-copy { transform:translate3d(0,46px,0) scale(.985); transition-delay:.08s; }
+.hero-mic { transform:translate3d(-50%, -28px, 0) rotate(8deg) scale(.94); transition-delay:.18s; }
+.hero-stamp { transition-delay:.12s; }
+.hero-left-note,.hero-right-note { transition-delay:.22s; }
+.hero-bottom { transition-delay:.28s; }
+.how-heading { transition-delay:.05s; }
+.how-grid article:nth-child(1) { transition-delay:.08s; }
+.how-grid article:nth-child(2) { transition-delay:.18s; }
+.how-grid article:nth-child(3) { transition-delay:.28s; }
+.how-grid article:nth-child(4) { transition-delay:.38s; }
+.landing-footer { transition-delay:.16s; }
+.scroll-revealed {
+  opacity:1 !important;
+  transform:translate3d(0,0,0) scale(1) !important;
+}
+.hero-mic.scroll-revealed { transform:translate3d(-50%,0,0) rotate(8deg) scale(1) !important; }
+.how-grid article { will-change:opacity,transform; }
+.landing-page .how-section { position:relative; }
+.landing-page .how-section:before {
+  content:"";
+  display:block;
+  height:3px;
+  width:var(--scroll-progress,0%);
+  background:#78b900;
+  position:absolute;
+  left:0; top:0;
+  transition:width .12s linear;
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto !important; }
+  .hero-copy,.hero-stamp,.hero-left-note,.hero-right-note,.hero-mic,.hero-bottom,
+  .how-heading,.how-grid article,.landing-footer {
+    opacity:1 !important; transform:none !important; transition:none !important;
+  }
+}
+
+
+/* ===== About section: editorial layout + floating motion ===== */
+html { scroll-behavior:smooth; scroll-padding-top:24px; }
+#about, #how-it-works { scroll-margin-top:28px; }
+.landing-page { scroll-behavior:smooth; }
+.about-section {
+  position:relative; isolation:isolate; overflow:hidden;
+  padding:clamp(64px,8vw,112px) clamp(24px,6vw,92px) 34px;
+  color:#f5efdf; background:#07351f;
+  min-height:690px;
+}
+.about-section:before {
+  content:""; position:absolute; inset:0; z-index:-2; opacity:.18;
+  background-image:radial-gradient(rgba(245,239,223,.65) .7px,transparent .8px);
+  background-size:7px 7px;
+}
+.about-section:after {
+  content:""; position:absolute; z-index:-1; width:min(65vw,760px); aspect-ratio:1;
+  border:1px solid rgba(245,239,223,.13); border-radius:50%;
+  right:-18%; top:4%; box-shadow:0 0 0 48px rgba(245,239,223,.025),0 0 0 96px rgba(245,239,223,.02);
+}
+.about-topline,.about-bottomline {
+  display:flex; justify-content:space-between; gap:20px;
+  font-size:11px; font-weight:800; letter-spacing:2px;
+  color:#d5e4b6; border-bottom:1px solid rgba(245,239,223,.35);
+  padding-bottom:15px;
+}
+.about-layout {
+  display:grid; grid-template-columns:1.12fr .88fr;
+  gap:clamp(36px,7vw,110px); align-items:center;
+  max-width:1320px; margin:58px auto 70px;
+}
+.about-kicker { color:#b7f36b; font-size:12px; font-weight:800; letter-spacing:3px; }
+.about-main h2 {
+  color:#f5efdf; font-family:Georgia,serif;
+  font-size:clamp(48px,7.5vw,108px); line-height:.88;
+  letter-spacing:-4px; margin:22px 0 30px;
+}
+.about-main h2 em { color:#b7f36b; font-style:normal; }
+.about-intro {
+  max-width:520px; color:#e0e5d6; font-size:clamp(15px,1.35vw,18px);
+  line-height:1.85; margin:0 0 32px;
+}
+.about-text-link {
+  display:inline-flex; align-items:center; gap:18px;
+  padding:14px 21px; border:1px solid rgba(245,239,223,.7);
+  border-radius:40px; color:#f5efdf; text-decoration:none;
+  font-size:11px; font-weight:800; letter-spacing:1.5px;
+  transition:background .3s ease,color .3s ease,transform .3s ease;
+}
+.about-text-link:hover { background:#f5efdf; color:#07351f; transform:translateY(-4px); }
+.about-text-link span { font-size:18px; }
+.about-side { display:grid; gap:17px; perspective:1000px; }
+.about-float-card {
+  position:relative; padding:23px 25px 24px 74px;
+  background:#f5efdf; color:#07351f; border:1px solid rgba(7,53,31,.2);
+  box-shadow:8px 9px 0 rgba(0,0,0,.12);
+  transition:transform .45s cubic-bezier(.2,.75,.25,1),box-shadow .45s ease;
+  animation:aboutFloat 6s ease-in-out infinite;
+}
+.about-float-card:nth-child(2) { animation-delay:-2s; margin-left:28px; }
+.about-float-card:nth-child(3) { animation-delay:-4s; margin-right:18px; }
+.about-float-card:hover { transform:translateY(-9px) rotate(-.5deg); box-shadow:12px 15px 0 rgba(0,0,0,.16); }
+.about-card-icon {
+  position:absolute; left:24px; top:26px; width:34px; height:34px;
+  display:grid; place-items:center; border:1px solid #78934d; border-radius:50%;
+  color:#31532b; font-size:20px;
+}
+.about-float-card small { color:#668343; font-size:9px; font-weight:900; letter-spacing:1.5px; }
+.about-float-card h3 { margin:9px 0 6px; font:700 23px Georgia,serif; }
+.about-float-card p { margin:0; color:#475541; font-size:13px; line-height:1.65; }
+.about-bottomline { border-top:1px solid rgba(245,239,223,.35); border-bottom:0; padding:20px 0 0; }
+@keyframes aboutFloat {
+  0%,100% { translate:0 0; }
+  50% { translate:0 -9px; }
+}
+.about-reveal {
+  opacity:0; transform:translate3d(0,38px,0) rotateX(3deg);
+  transition:opacity .9s cubic-bezier(.2,.75,.25,1),transform 1s cubic-bezier(.2,.75,.25,1);
+}
+.about-reveal.scroll-revealed { opacity:1; transform:translate3d(0,0,0) rotateX(0); }
+.about-side .about-float-card:nth-child(2) { transition-delay:.12s; }
+.about-side .about-float-card:nth-child(3) { transition-delay:.24s; }
+@media(max-width:820px) {
+  .about-layout { grid-template-columns:1fr; margin:42px auto 52px; }
+  .about-main h2 { letter-spacing:-2px; }
+  .about-side { max-width:620px; }
+}
+@media(max-width:560px) {
+  .about-section { padding:58px 22px 28px; }
+  .about-topline,.about-bottomline { font-size:8px; letter-spacing:1px; }
+  .about-float-card { padding:20px 18px 20px 62px; }
+  .about-card-icon { left:17px; }
+  .about-float-card:nth-child(2),.about-float-card:nth-child(3) { margin-left:0; margin-right:0; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .about-float-card { animation:none !important; }
+  .about-reveal { opacity:1 !important; transform:none !important; transition:none !important; }
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="app-layout auth-screen">
+
+<section class="landing-page" id="landingPage" style="display:none">
+  <nav class="landing-nav">
+    <div class="landing-links">
+      <a class="current" href="#home">HOME</a><a href="#about">ABOUT</a><a href="#how-it-works">LEARN</a><a href="#how-it-works">PRICING</a>
+    </div>
+    <a class="landing-logo" href="#home">FLUENCY<br><span>LENS</span><small>◖)))</small></a>
+    <div class="landing-actions">
+      <span>PRACTICE<br>WITH AI</span>
+      <button class="landing-cta" onclick="showPractice()">GET STARTED ↗</button>
+      <span class="user-mark">◉</span><span class="menu-mark">☰</span>
+    </div>
+  </nav>
+
+  <section class="hero" id="home">
+    <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+    <div class="hero-stamp">✳ AI SPEAKING COACH · REAL CONVERSATIONS · BUILD CONFIDENCE ·</div>
+    <div class="hero-left-note">↗<br><b>PRACTISE<br>ANYTIME</b></div>
+    <div class="hero-right-note">≋<br><b>BUILD<br>CONFIDENCE</b></div>
+    <div class="hero-copy">
+      <p class="eyebrow">YOUR VOICE. YOUR PACE. YOUR PROGRESS.</p>
+      <h1>SPEAK ENGLISH,<br><span>WITHOUT</span><br>HESITATION.</h1>
+      <p class="hero-description">AN AI-POWERED SPEAKING PARTNER TO HELP YOU<br>COMMUNICATE WITH CONFIDENCE.</p>
+      <button class="hero-button" onclick="showPractice()">START SPEAKING <span>→</span></button>
+    </div>
+    <div class="hero-mic" aria-hidden="true">
+      <div class="mic-glow"></div><div class="mic-head"><i></i></div><div class="mic-neck"></div><div class="mic-body"><span>FLUENCY LENS</span></div><div class="mic-stand"></div><div class="mic-base"></div>
+    </div>
+    <div class="hero-bottom">SPEAK CLEARLY. THINK FREELY. BE HEARD.</div>
+  </section>
+
+
+  <section class="about-section" id="about" aria-labelledby="about-title">
+    <div class="about-orb about-orb-one" aria-hidden="true"></div>
+    <div class="about-orb about-orb-two" aria-hidden="true"></div>
+    <div class="about-topline about-reveal">
+      <span>OUR PURPOSE</span><span>01 — ABOUT FLUENCY LENS</span>
+    </div>
+    <div class="about-layout">
+      <div class="about-main about-reveal">
+        <p class="about-kicker">MORE THAN JUST SPEAKING</p>
+        <h2 id="about-title">YOUR VOICE<br>DESERVES TO BE<br><em>HEARD.</em></h2>
+        <p class="about-intro">FluencyLens is an AI-powered English speaking coach designed to help you practise out loud, understand your speaking habits and grow more confident—one conversation at a time.</p>
+        <a class="about-text-link" href="#how-it-works">DISCOVER HOW IT WORKS <span>↓</span></a>
+      </div>
+      <div class="about-side">
+        <div class="about-float-card about-reveal">
+          <span class="about-card-icon">◉</span>
+          <small>01 / SPEAK NATURALLY</small>
+          <h3>Practice without pressure.</h3>
+          <p>Build a habit of speaking through guided prompts and voice-based practice.</p>
+        </div>
+        <div class="about-float-card about-reveal">
+          <span class="about-card-icon">⌁</span>
+          <small>02 / UNDERSTAND YOUR SPEECH</small>
+          <h3>See what you can improve.</h3>
+          <p>Review indicators such as speaking pace, filler words and pauses, with practical feedback.</p>
+        </div>
+        <div class="about-float-card about-reveal">
+          <span class="about-card-icon">↗</span>
+          <small>03 / GROW WITH CONFIDENCE</small>
+          <h3>Make every attempt count.</h3>
+          <p>Use your feedback to focus your next practice and prepare for real conversations.</p>
+        </div>
+      </div>
+    </div>
+    <div class="about-bottomline about-reveal">
+      <span>LESS HESITATION. MORE EXPRESSION.</span>
+      <span>FLUENCY IS BUILT, NOT RUSHED.</span>
+    </div>
+  </section>
+
+  <section class="how-section" id="how-it-works">
+    <div class="how-heading"><span>HOW IT WORKS</span><b>A SIMPLE PATH TO FLUENCY</b></div>
+    <div class="how-grid">
+      <article><small>01</small><h2>SPEAK</h2><p>Have real conversations<br>with an AI speaking partner.</p></article>
+      <article><small>02</small><h2>ANALYSE</h2><p>Get feedback on your fluency,<br>pace and filler words.</p></article>
+      <article><small>03</small><h2>IMPROVE</h2><p>Practise with guided exercises<br>and everyday topics.</p></article>
+      <article><small>04</small><h2>PREPARE</h2><p>Build confidence for<br>interviews and beyond.</p></article>
+    </div>
+    <div class="landing-footer"><span>FLUENCY LENS © 2026</span><span>FIND YOUR VOICE. OWN YOUR WORDS.</span><button onclick="showPractice()">START YOUR PRACTICE ↗</button></div>
+  </section>
+</section>
+
+
+
+
+    <!-- Left Navigation Sidebar -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <h2>FLUENCY<span>LENS</span></h2>
+
+            <p>AI English Coach</p>
+
+        </div>
+
+
+
+        <nav class="sidebar-nav">
+
+            <a href="#" class="nav-item active" data-section="overview">
+
+                <span>⌂</span> Overview
+
+            </a>
+
+
+
+            <a href="#" class="nav-item" data-section="practice">
+
+                <span>🎙</span> Practice
+
+            </a>
+
+
+
+            <a href="#" class="nav-item" data-section="progress">
+
+                <span>▥</span> Progress
+
+            </a>
+
+
+
+            <a href="#" class="nav-item" data-section="achievements">
+
+                <span>🏆</span> Achievements
+
+            </a>
+
+
+
+            <a href="#" class="nav-item" data-section="profile">
+
+                <span>◉</span> Profile
+
+            </a>
+
+        </nav>
+
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn" class="logout-btn" onclick="logout()">
+
+                ↪ Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <main class="app">
+
+
+
+    <header>
+
+        <h1>FluencyLens</h1>
+
+        <p>AI English coach for confident speaking</p>
+
+    </header>
+
+
+
+
+
+    <section class="card" id="authCard">
+
+        <h2 id="authTitle">Welcome to FluencyLens</h2>
+
+        <p id="authMessage">Sign in to start your speaking practice.</p>
+
+
+
+        <div id="registerNameField" hidden>
+
+            <input id="authName" type="text" placeholder="Full name">
+
+        </div>
+
+
+
+        <input id="authEmail" type="email" placeholder="Email address">
+
+        <input id="authPassword" type="password" placeholder="Password">
+
+
+
+        <button class="main" id="authSubmit" onclick="handleAuth()">
+
+            Login
+
+        </button>
+
+
+
+        <button class="link-btn" onclick="toggleAuth()">
+
+            Create an account
+
+        </button>
+
+
+
+        <p id="authStatus" role="status"></p>
+
+    </section>
+
+
+
+    <div id="practiceApp" hidden>
+
+    <section class="card" aria-label="Practice question">
+
+        <p class="question-text" id="question">Tell me about yourself.</p>
+
+        <button class="link-btn" id="newQBtn" onclick="newQuestion()">New question</button>
+
+    </section>
+
+
+
+    <section class="card recorder" id="recorderCard">
+
+        <div class="mic-wrap">
+
+            <div class="mic-pulse" id="pulse"></div>
+
+            <div class="mic-core" aria-hidden="true">🎙️</div>
+
+        </div>
+
+
+
+        <div id="timer">0:00</div>
+
+
+
+        <div class="buttons">
+
+            <button class="main" id="recordBtn" onclick="startRecording()">Record</button>
+
+            <button class="main" id="stopBtn" onclick="stopRecording()" disabled>Stop</button>
+
+            <button class="main" id="endBtn" onclick="endConversation()">End Conversation</button>
+
+        </div>
+
+
+
+        <p id="status" role="status" aria-live="polite">Ready to record</p>
+
+    </section>
+
+
+
+    <section class="card">
+
+        <h2>Conversation</h2>
+
+        <div id="chatHistory">
+
+            <p class="hint">Your conversation will appear here.</p>
+
+        </div>
+
+    </section>
+
+
+
+    <section class="card" aria-live="polite">
+
+        <div class="score-wrap">
+
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+
+                <circle class="track" cx="100" cy="100" r="85"></circle>
+
+                <circle class="bar" id="bar" cx="100" cy="100" r="85"></circle>
+
+            </svg>
+
+            <div id="score">--</div>
+
+        </div>
+
+        <h2 id="label">No result yet</h2>
+
+
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <b><span id="wpm">--</span> <span class="unit">WPM</span></b>
+
+                <span class="name">Speaking pace</span>
+
+            </div>
+
+            <div class="stat">
+
+                <b id="fillers">--</b>
+
+                <span class="name">Filler words</span>
+
+            </div>
+
+            <div class="stat">
+
+                <b id="slow_words">--</b>
+
+                <span class="name">Slow words</span>
+
+            </div>
+
+            <div class="stat">
+
+                <b><span id="filler_percent">--</span><span class="unit">%</span></b>
+
+                <span class="name">Filler percentage</span>
+
+            </div>
+
+        </div>
+
+
+
+        <p class="hint" id="hint">Aim for 120–160 words per minute and as few fillers as you can.</p>
+
+    </section>
+
+    <section class="card" id="feedbackCard" hidden>
+
+        <h2>Personalized Feedback</h2>
+
+
+
+        <h3>Your strengths</h3>
+
+        <div id="feedbackStrengths"></div>
+
+
+
+        <h3>Areas to improve</h3>
+
+        <div id="feedbackImprovements"></div>
+
+
+
+        <h3>Your next tip</h3>
+
+        <p id="feedbackTip"></p>
+
+    </section>
+
+</div>
+
+</main>
+
+</div>
+
+
+
+<script>
+
+const QUESTIONS = [
+
+    "Tell me about yourself.",
+
+    "Why do you want this job?",
+
+    "What is your biggest strength?",
+
+    "Describe a challenge you overcame.",
+
+    "Where do you see yourself in five years?",
+
+    "Why should we hire you?",
+
+    "Tell me about a time you worked in a team.",
+
+    "What is one mistake you learned from?"
+
+];
+
+
+
+const $ = id => document.getElementById(id);
+
+
+
+
+
+let isRegistering = false;
+
+
+
+function openAuth() {
+    // Authentication is the entry screen; this helper returns to it when needed.
+    const layout = document.querySelector(".app-layout");
+    layout.classList.remove("authenticated", "logged-in-landing");
+    layout.classList.add("auth-screen");
+    $("landingPage").style.display = "none";
+    $("authCard").hidden = false;
+    $("practiceApp").hidden = true;
+    $("authStatus").textContent = "";
+}
+
+function showLanding() {
+    const layout = document.querySelector(".app-layout");
+    $("authCard").hidden = true;
+    $("practiceApp").hidden = true;
+    $("landingPage").style.display = "block";
+    layout.classList.remove("auth-screen", "authenticated");
+    layout.classList.add("logged-in-landing");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showPractice() {
+    const layout = document.querySelector(".app-layout");
+    const landing = $("landingPage");
+    const practice = $("practiceApp");
+
+    // Let the landing page glide upward before revealing the practice workspace.
+    if (landing && landing.style.display !== "none" && landing.animate) {
+        landing.animate(
+            [
+                { opacity: 1, transform: "translateY(0)" },
+                { opacity: 0, transform: "translateY(-42px)" }
+            ],
+            { duration: 360, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
+        ).finished.catch(() => {}).then(() => {
+            landing.style.display = "none";
+            landing.style.opacity = "";
+            landing.style.transform = "";
+        });
+    } else if (landing) {
+        landing.style.display = "none";
+    }
+
+    $("authCard").hidden = true;
+    practice.hidden = false;
+    layout.classList.remove("auth-screen", "logged-in-landing");
+    layout.classList.add("authenticated", "practice-transitioning");
+
+    // Smoothly reset the viewport, then glide the practice workspace into place.
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+        const targets = [layout.querySelector("main.app > header"), practice].filter(Boolean);
+        targets.forEach((el, index) => {
+            if (el.animate) {
+                el.animate(
+                    [
+                        { opacity: 0, transform: `translate3d(0, ${index === 0 ? 18 : 42}px, 0)` },
+                        { opacity: 1, transform: "translate3d(0, 0, 0)" }
+                    ],
+                    { duration: index === 0 ? 520 : 760, delay: index === 0 ? 80 : 150,
+                      easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" }
+                );
+            }
+        });
+        window.setTimeout(() => layout.classList.remove("practice-transitioning"), 900);
+    });
+}
+
+function toggleAuth() {
+
+    isRegistering = !isRegistering;
+
+
+
+    $("authTitle").textContent = isRegistering
+
+        ? "Create your account"
+
+        : "Welcome to FluencyLens";
+
+
+
+    $("authMessage").textContent = isRegistering
+
+        ? "Join FluencyLens and improve your speaking."
+
+        : "Sign in to start your speaking practice.";
+
+
+
+    $("registerNameField").hidden = !isRegistering;
+
+    $("authSubmit").textContent = isRegistering ? "Register" : "Login";
+
+}
+
+
+
+async function handleAuth() {
+
+    const name = $("authName").value.trim();
+
+    const email = $("authEmail").value.trim();
+
+    const password = $("authPassword").value;
+
+
+
+    if (!email || !password || (isRegistering && !name)) {
+
+        $("authStatus").textContent = "Please complete all required fields.";
+
+        return;
+
+    }
+
+
+
+    const endpoint = isRegistering ? "/register" : "/login";
+
+
+
+    try {
+
+        const response = await fetch(endpoint, {
+
+            method: "POST",
+
+            headers: { "Content-Type": "application/json" },
+
+            body: JSON.stringify(
+
+                isRegistering
+
+                    ? { name, email, password }
+
+                    : { email, password }
+
+            )
+
+        });
+
+
+
+        const data = await response.json();
+
+
+
+        $("authStatus").textContent = data.message || data.error;
+
+
+
+        if (response.ok && !isRegistering) {
+            showLanding();
+
+        } else if (response.ok && isRegistering) {
+
+            toggleAuth();
+
+        }
+
+    } catch (error) {
+
+        $("authStatus").textContent = "Cannot connect to the server.";
+
+    }
+
+}
+
+
+
+let recorder = null;
+
+let conversationActive = false;
+
+let chunks = [];
+
+let stream = null;
+
+let audioCtx = null;
+
+let rafId = null;
+
+let timerId = null;
+
+let startedAt = 0;
+
+
+
+function newQuestion() {
+
+    const current = $("question").textContent;
+
+    let next;
+
+    do {
+
+        next = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+
+    } while (next === current && QUESTIONS.length > 1);
+
+    $("question").textContent = next;
+
+}
+
+
+
+function setStatus(text, isError = false) {
+
+    $("status").textContent = text;
+
+    $("status").classList.toggle("error", isError);
+
+}
+
+
+
+async function startRecording() {
+
+    if (recorder && recorder.state !== "inactive") return;
+    if (speechSynthesis.speaking || speechSynthesis.pending) return;
+
+    conversationActive = true;
+
+    try {
+
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    } catch (error) {
+
+        setStatus("Microphone blocked. Allow access in the address bar and try again.", true);
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+
+    // Keep the last successful analysis visible while recording.
+    // A failed/too-short recording must not erase the previous score.
+
+
+
+
+    // Pick a format this browser supports
+
+    const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]
+
+        .find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+
+
+
+    recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+
+    chunks = [];
+
+
+
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = sendAudio;
+
+    recorder.start();
+
+
+
+    startMeter(stream);
+
+    startTimer();
+
+
+
+    $("recorderCard").classList.add("recording");
+
+    $("recordBtn").disabled = true;
+
+    $("stopBtn").disabled = false;
+
+    $("newQBtn").disabled = true;
+
+    setStatus("Recording... speak naturally");
+
+}
+
+
+
+function stopRecording() {
+
+
+
+    if (!recorder || recorder.state === "inactive") return;
+
+
+
+    recorder.stop();
+
+    stream.getTracks().forEach(t => t.stop());   // release the microphone
+
+    stopMeter();
+
+    stopTimer();
+
+
+
+    $("recorderCard").classList.remove("recording");
+
+    $("stopBtn").disabled = true;
+    $("recordBtn").disabled = true;
+    $("newQBtn").disabled = true;
+
+    setStatus("Your recording is complete. Analysing your full answer...");
+
+}
+
+
+
+function endConversation() {
+
+    conversationActive = false;
+
+
+
+    // Stop any AI speech currently playing
+
+    speechSynthesis.cancel();
+
+
+
+    // Stop the microphone if it is recording
+
+    if (recorder && recorder.state !== "inactive") {
+
+        stopRecording();
+
+    }
+
+
+
+    $("recordBtn").disabled = false;
+
+    $("stopBtn").disabled = true;
+
+    $("newQBtn").disabled = false;
+
+
+
+    setStatus("Conversation ended.");
+
+}
+
+
+
+function startTimer() {
+
+    startedAt = Date.now();
+
+    $("timer").textContent = "0:00";
+
+    timerId = setInterval(() => {
+
+        const s = Math.floor((Date.now() - startedAt) / 1000);
+
+        $("timer").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+
+    }, 250);
+
+}
+
+function stopTimer() { clearInterval(timerId); }
+
+
+
+function startMeter(s) {
+
+    try {
+
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const analyser = audioCtx.createAnalyser();
+
+        analyser.fftSize = 256;
+
+        audioCtx.createMediaStreamSource(s).connect(analyser);
+
+        const data = new Uint8Array(analyser.frequencyBinCount);
+
+        const pulse = $("pulse");
+
+
+
+        const tick = () => {
+
+            analyser.getByteTimeDomainData(data);
+
+            let peak = 0;
+
+            for (const v of data) peak = Math.max(peak, Math.abs(v - 128));
+
+            const level = Math.min(peak / 60, 1);          // 0 to 1
+
+            pulse.style.opacity = (0.15 + level * 0.35).toFixed(2);
+
+            pulse.style.transform = "scale(" + (1 + level * 0.25).toFixed(3) + ")";
+
+            rafId = requestAnimationFrame(tick);
+
+        };
+
+        tick();
+
+    } catch (e) {
+
+        console.warn("Level meter unavailable:", e);
+
+    }
+
+}
+
+function stopMeter() {
+
+    cancelAnimationFrame(rafId);
+
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+
+    $("pulse").style.opacity = 0;
+
+    $("pulse").style.transform = "scale(1)";
+
+}
+
+
+
+async function sendAudio() {
+
+    const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+
+    const form = new FormData();
+
+    const ext = (recorder.mimeType || "").includes("mp4") ? "mp4" : "webm";
+
+    form.append("audio", blob, "recording." + ext);
+
+
+
+    try {
+
+        const response = await fetch("/chat", { method: "POST", body: form });
+
+
+
+        let data;
+
+        try {
+
+            data = await response.json();
+
+        } catch (parseError) {
+
+            setStatus("Server error (" + response.status + "). Check the terminal running server.py.", true);
+
+            console.error(parseError);
+
+            data = null;
+
+        }
+
+        if (data) showResult(data);
+
+    } catch (error) {
+
+        setStatus("Could not reach the server. Is python server.py running?", true);
+
+        console.error(error);
+
+        $("recordBtn").disabled = false;
+        $("newQBtn").disabled = false;
+
+    }
+
+
+
+    if (!speechSynthesis.speaking) {
+        $("recordBtn").disabled = false;
+        $("newQBtn").disabled = false;
+    }
+
+}
+
+
+
+function resetResult() {
+
+    $("score").textContent = "--";
+
+    $("label").textContent = "No result yet";
+
+    ["wpm", "fillers", "slow_words", "filler_percent"].forEach(id => $(id).textContent = "--");
+
+    $("bar").style.strokeDashoffset = 534.1;
+
+    $("bar").style.stroke = "";
+
+    $("label").style.color = "";
+
+}
+
+
+
+function speak(text) {
+    if (!text) return;
+
+    // AI speech is allowed only after the user has pressed Stop and the
+    // completed recording has been analysed. Never auto-start the microphone.
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+
+    $("recordBtn").disabled = true;
+    $("stopBtn").disabled = true;
+    $("newQBtn").disabled = true;
+    setStatus("FluencyLens is speaking. Press Record when you are ready to reply.");
+
+    utterance.onend = () => {
+        $("recordBtn").disabled = false;
+        $("stopBtn").disabled = true;
+        $("newQBtn").disabled = false;
+        setStatus("AI reply complete. Press Record when you are ready.");
+    };
+
+    utterance.onerror = () => {
+        $("recordBtn").disabled = false;
+        $("stopBtn").disabled = true;
+        $("newQBtn").disabled = false;
+        setStatus("AI voice playback stopped. Press Record to continue.");
+    };
+
+    // Clear any queued speech before speaking this one response.
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+}
+
+function addChatMessage(role, message) {
+
+    const chat = $("chatHistory");
+
+
+
+    const placeholder = chat.querySelector(".hint");
+
+
+
+    if (placeholder) {
+
+        placeholder.remove();
+
+    }
+
+
+
+    const bubble = document.createElement("div");
+
+    bubble.style.padding = "12px";
+
+    bubble.style.margin = "10px 0";
+
+    bubble.style.borderRadius = "12px";
+
+    bubble.style.background =
+
+        role === "You" ? "#e8edff" : "#e8f7ef";
+
+
+
+    const heading = document.createElement("strong");
+
+    heading.textContent = role;
+
+
+
+    const content = document.createElement("p");
+
+    content.textContent = message;
+
+    content.style.marginBottom = "0";
+
+
+
+    bubble.appendChild(heading);
+
+    bubble.appendChild(content);
+
+    chat.appendChild(bubble);
+
+}
+
+
+
+function showResult(data) {
+
+    if (data.error) {
+
+        setStatus(data.error, true);
+
+        return;
+
+    }
+
+
+
+    const scoreValue = data.fluency_score ?? data.score;
+    const score = Number(scoreValue);
+
+    if (!Number.isFinite(score)) {
+        setStatus("Analysis received, but the server did not return a valid fluency_score.", true);
+        console.error("Missing/invalid fluency score in /chat response:", data);
+        return;
+    }
+
+    $("score").textContent = Math.round(Math.max(0, Math.min(100, score)));
+    $("label").textContent = String(data.label ?? "ANALYSED").toUpperCase();
+
+    $("wpm").textContent = data.wpm ?? "--";
+    $("fillers").textContent = data.fillers ?? "--";
+    $("slow_words").textContent = data.slow_words ?? "--";
+    $("filler_percent").textContent = data.filler_percent ?? "--";
+
+
+
+    if (data.feedback) {
+
+        $("feedbackCard").hidden = false;
+
+
+
+        $("feedbackStrengths").textContent =
+
+        data.feedback.strengths.map(x => "✓ " + x).join("\n");
+
+
+
+        $("feedbackImprovements").textContent =
+
+        data.feedback.improvements.map(x => "• " + x).join("\n");
+
+
+
+        $("feedbackTip").textContent = data.feedback.tip;
+
+    }
+
+
+
+    const color = score >= 75 ? "var(--good)" : score >= 50 ? "var(--warn)" : "var(--bad)";
+
+    $("bar").style.stroke = color;
+
+    $("label").style.color = color;
+
+    $("bar").style.strokeDashoffset = 534.1 * (1 - Math.max(0, Math.min(score, 100)) / 100);
+
+
+
+    const tips = [];
+
+    if (data.wpm < 110) tips.push("Your pace is a little slow, so try speaking more steadily.");
+
+    else if (data.wpm > 170) tips.push("You are speaking fast, so slow down and pause between ideas.");
+
+    if (data.filler_percent > 5) tips.push("Replace fillers with a short silent pause.");
+
+    $("hint").textContent = tips.length ? tips.join(" ") : "Nice pace and clean delivery. Try a new question.";
+
+
+
+    setStatus("Ai is replying...");
+
+    addChatMessage("You", data.you_said);
+
+    addChatMessage("FluencyLens", data.reply);
+
+    if (data.reply && String(data.reply).trim()) {
+        speak(data.reply);
+    } else {
+        $("recordBtn").disabled = false;
+        $("newQBtn").disabled = false;
+        setStatus("Analysis complete. Press Record when you are ready.");
+    }
+
+}
+
+
+/* Scroll reveal + subtle parallax for the public landing page.
+   Uses IntersectionObserver so sections animate as they enter the viewport,
+   while the browser keeps normal, user-controlled scrolling. */
+(function initLandingScrollMotion() {
+  const landing = document.getElementById("landingPage");
+  if (!landing || landing.dataset.scrollMotionReady === "1") return;
+  landing.dataset.scrollMotionReady = "1";
+
+  const revealTargets = landing.querySelectorAll(
+    ".hero-copy, .hero-stamp, .hero-left-note, .hero-right-note, .hero-mic, .hero-bottom, " +
+    ".how-heading, .how-grid article, .landing-footer, .about-reveal"
+  );
+
+  const reducedMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reducedMotion || !("IntersectionObserver" in window)) {
+    revealTargets.forEach(el => el.classList.add("scroll-revealed"));
+  } else {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("scroll-revealed");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: "0px 0px -7% 0px" });
+
+    revealTargets.forEach(el => revealObserver.observe(el));
+  }
+
+  let ticking = false;
+  const updateScrollEffects = () => {
+    const rect = landing.getBoundingClientRect();
+    const totalScrollable = Math.max(1, landing.scrollHeight - window.innerHeight);
+    const travelled = Math.min(totalScrollable, Math.max(0, -rect.top));
+    const progress = Math.max(0, Math.min(100, travelled / totalScrollable * 100));
+
+    landing.style.setProperty("--page-scroll-progress", progress + "%");
+    const how = landing.querySelector(".how-section");
+    if (how) {
+      const howRect = how.getBoundingClientRect();
+      const sectionProgress = Math.max(0, Math.min(1,
+        (window.innerHeight - howRect.top) / (window.innerHeight + howRect.height)
+      ));
+      how.style.setProperty("--scroll-progress", (sectionProgress * 100) + "%");
+    }
+
+    landing.classList.toggle("is-scrolling", window.scrollY > 12);
+
+    if (!reducedMotion) {
+      const orbit = landing.querySelector(".orbit-one");
+      const mic = landing.querySelector(".hero-mic");
+      const hero = landing.querySelector(".hero");
+      if (hero) {
+        const heroRect = hero.getBoundingClientRect();
+        const offset = Math.max(-90, Math.min(90, -heroRect.top * 0.12));
+        if (orbit) orbit.style.translate = `0 ${offset}px`;
+        if (mic && heroRect.bottom > 0 && heroRect.top < window.innerHeight) {
+          mic.style.marginTop = `${Math.max(-18, Math.min(18, -heroRect.top * 0.035))}px`;
+        }
+      }
+    }
+    ticking = false;
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateScrollEffects);
+    }
+  };
+
+  window.addEventListener("scroll", onScroll, { passive:true });
+  window.addEventListener("resize", onScroll, { passive:true });
+  updateScrollEffects();
+})();
+
+</script>
+
+
+
+</body>
+
+</html>

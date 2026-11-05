@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#171A19"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FLUENCY LENS"
+        android:textColor="#B7F36B"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"/>
+
+    <TextView
+        android:id="@+id/welcomeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your speaking practice"
+        android:textColor="#F5F1E8"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_marginTop="22dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Speak naturally. Improve confidently."
+        android:textColor="#A6AAA6"
+        android:textSize="14sp"
+        android:layout_marginTop="6dp"/>
+
+    <!-- Fluency Score -->
+
+    <!-- Speech Analysis Dashboard -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#252827"
+        android:padding="18dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="YOUR SPEECH ANALYSIS"
+            android:textColor="#A6AAA6"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+
+        <!-- Circular Score -->
+        <FrameLayout
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_score_circle">
+
+            <TextView
+                android:id="@+id/scoreText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="--"
+                android:textColor="#B7F36B"
+                android:textSize="42sp"
+                android:textStyle="bold"/>
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fluency Score"
+            android:textColor="#F5F1E8"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:id="@+id/statsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No result yet"
+            android:textColor="#A6AAA6"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:layout_marginTop="6dp"/>
+
+        <!-- Metrics Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="18dp">
+
+            <include
+                layout="@layout/item_metric_wpm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <include
+                layout="@layout/item_metric_fillers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- Metrics Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <include
+                layout="@layout/item_metric_slow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <include
+                layout="@layout/item_metric_percent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aim for 120–160 words per minute and as few fillers as possible."
+            android:textColor="#A6AAA6"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+
+
+    <!-- Conversation -->
+
+
+    <!-- Personalized Feedback -->
+    <LinearLayout
+        android:id="@+id/feedbackCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#252827"
+        android:padding="16dp"
+        android:layout_marginTop="20dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PERSONALIZED FEEDBACK"
+            android:textColor="#B7F36B"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your strengths"
+            android:textColor="#F5F1E8"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/feedbackStrengths"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B7F36B"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Areas to improve"
+            android:textColor="#F5F1E8"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/feedbackImprovements"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F5F1E8"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your next tip"
+            android:textColor="#F5F1E8"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/feedbackTip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B7F36B"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"/>
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="AI Conversation"
+        android:textColor="#F5F1E8"
+        android:textSize="19sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="12dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#252827"
+        android:padding="16dp"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/chatText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to FluencyLens!\n\nStart speaking English and your AI coach will help you improve."
+            android:textColor="#F5F1E8"
+            android:textSize="15sp"
+            android:lineSpacingExtra="7dp"/>
+    </ScrollView>
+
+    <!-- Status -->
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ready to practise?"
+        android:textColor="#A6AAA6"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Start Speaking -->
+    <Button
+        android:id="@+id/recordBtn"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:text="Start Speaking"
+        android:textColor="#171A19"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:backgroundTint="#B7F36B"/>
+
+    <!-- End Conversation -->
+    <Button
+        android:id="@+id/endBtn"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="End Conversation"
+        android:textColor="#F5F1E8"
+        android:textSize="14sp"
+        android:textAllCaps="false"
+        android:backgroundTint="#343936"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>
+</ScrollView>
